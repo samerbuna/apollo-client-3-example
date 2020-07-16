@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { gql, useMutation } from "@apollo/client";
 
-import { useActions } from "../store";
+import {
+  useLocalAppState,
+  setLocalAppState,
+  AppLink,
+} from "../store";
 import Errors from "./errors";
 import LoginOrSignup from "./login-or-signup";
 
@@ -25,16 +29,11 @@ const TASK_CREATE = gql`
 `;
 
 export default function NewTask() {
-  const {
-    getLocalAppState,
-    setLocalAppState,
-    AppLink,
-  } = useActions();
   const [uiErrors, setUIErrors] = useState([]);
 
   const [createTask, { error, loading }] = useMutation(TASK_CREATE);
 
-  const user = getLocalAppState("user");
+  const user = useLocalAppState("user");
 
   const handleNewTaskSubmit = async (event) => {
     event.preventDefault();

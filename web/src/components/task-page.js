@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { gql, useApolloClient, useQuery } from "@apollo/client";
 
-import { useActions } from "../store";
+import { AppLink } from "../store";
+
 import Approach, { APPROACH_FRAGMENT } from "./approach";
 import TaskSummary, { TASK_SUMMARY_FRAGMENT } from "./task-summary";
 import NewApproach from "./new-approach";
@@ -29,7 +30,6 @@ const TASK_INFO = gql`
 `;
 
 export default function TaskPage({ taskId }) {
-  const { AppLink } = useActions();
   const [showAddApproach, setShowAddApproach] = useState(false);
   const [
     highlightedApproachId,

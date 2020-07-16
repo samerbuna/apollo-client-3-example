@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { gql, useMutation } from "@apollo/client";
 
-import { useActions } from "../store";
+import { useLocalAppState } from "../store";
+
 import Errors from "./errors";
 import LoginOrSignup from "./login-or-signup";
 import { APPROACH_FRAGMENT } from "./approach";
@@ -24,14 +25,13 @@ const APPROACH_CREATE = gql`
 `;
 
 export default function NewApproach({ taskId, onSuccess }) {
-  const { getLocalAppState } = useActions();
   const [uiErrors, setUIErrors] = useState([]);
 
   const [createApproach, { error, loading }] = useMutation(
     APPROACH_CREATE
   );
 
-  const user = getLocalAppState("user");
+  const user = useLocalAppState("user");
 
   const handleNewApproachSubmit = async (event) => {
     event.preventDefault();

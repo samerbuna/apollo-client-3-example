@@ -1,10 +1,8 @@
 import React from "react";
 
-import { useActions } from "../store";
+import { setLocalAppState, AppLink } from "../store";
 
 export default function Navbar({ user }) {
-  const { setLocalAppState, AppLink } = useActions();
-
   const handleLogout = (event) => {
     event.preventDefault();
     window.localStorage.removeItem("azdev:user");
