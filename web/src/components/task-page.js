@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { gql, useApolloClient, useQuery } from "@apollo/client";
+import {
+  gql,
+  useApolloClient,
+  useQuery,
+  useSubscription,
+} from "@apollo/client";
 
 import { AppLink } from "../store";
 
@@ -29,6 +34,15 @@ const TASK_INFO = gql`
   ${FULL_QUESTINO_FRAGMENT}
 `;
 
+const VOTE_CHANGED = gql`
+  subscription voteChanged($taskId: ID!) {
+    voteChanged(taskId: $taskId) {
+      id
+      voteCount
+    }
+  }
+`;
+
 export default function TaskPage({ taskId }) {
   const [showAddApproach, setShowAddApproach] = useState(false);
   const [
@@ -37,6 +51,10 @@ export default function TaskPage({ taskId }) {
   ] = useState();
 
   const { error, loading, data } = useQuery(TASK_INFO, {
+    variables: { taskId },
+  });
+
+  useSubscription(VOTE_CHANGED, {
     variables: { taskId },
   });
 

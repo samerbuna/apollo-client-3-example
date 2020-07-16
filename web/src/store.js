@@ -1,18 +1,28 @@
 import React from "react";
-
-import { GRAPHQL_SERVER_URL } from "./config";
-
 import {
   ApolloClient,
   HttpLink,
   InMemoryCache,
   gql,
   useQuery,
+  split,
 } from "@apollo/client";
+import { getMainDefinition } from "@apollo/client/utilities";
 import { setContext } from "@apollo/link-context";
+import { WebSocketLink } from "@apollo/link-ws";
+
+import {
+  GRAPHQL_SERVER_URL,
+  GRAPHQL_SUBSCRIPTIONS_URL,
+} from "./config";
 
 const cache = new InMemoryCache();
 const httpLink = new HttpLink({ uri: GRAPHQL_SERVER_URL });
+
+const wsLink = new WebSocketLink({
+  uri: GRAPHQL_SUBSCRIPTIONS_URL,
+  options: { reconnect: true },
+});
 
 const authLink = setContext((_, { headers }) => {
   const { user } = cache.readQuery({ query: LOCAL_APP_STATE });
@@ -24,8 +34,20 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
+const splitLink = split(
+  ({ query }) => {
+    const definition = getMainDefinition(query);
+    return (
+      definition.kind === "OperationDefinition" &&
+      definition.operation === "subscription"
+    );
+  },
+  wsLink,
+  authLink.concat(httpLink)
+);
+
 export const client = new ApolloClient({
-  link: authLink.concat(httpLink),
+  link: splitLink,
   cache,
 });
 
