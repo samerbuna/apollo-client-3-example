@@ -1,11 +1,12 @@
 import React, { useState } from "react";
+import { gql } from "@apollo/client";
 
 import { useActions } from "../store";
 import Errors from "./errors";
 import LoginOrSignup from "./login-or-signup";
 import { APPROACH_FRAGMENT } from "./approach";
 
-const APPROACH_CREATE = `
+const APPROACH_CREATE = gql`
   mutation approachCreate($taskId: ID!, $input: ApproachInput!) {
     approachCreate(taskId: $taskId, input: $input) {
       errors {
@@ -23,7 +24,7 @@ const APPROACH_CREATE = `
 `;
 
 export default function NewApproach({ taskId, onSuccess }) {
-  const { getLocalAppState, request } = useActions();
+  const { getLocalAppState, mutate } = useActions();
   const [uiErrors, setUIErrors] = useState([]);
 
   const user = getLocalAppState("user");
@@ -32,7 +33,7 @@ export default function NewApproach({ taskId, onSuccess }) {
     event.preventDefault();
     setUIErrors([]);
     const input = event.target.elements;
-    const { data, errors: rootErrors } = await request(
+    const { data, errors: rootErrors } = await mutate(
       APPROACH_CREATE,
       {
         variables: {

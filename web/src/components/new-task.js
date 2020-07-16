@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { gql } from "@apollo/client";
 
 import { useActions } from "../store";
 import Errors from "./errors";
@@ -6,7 +7,7 @@ import LoginOrSignup from "./login-or-signup";
 
 import { FULL_TASK_FRAGMENT } from "./task-page";
 
-const TASK_CREATE = `
+const TASK_CREATE = gql`
   mutation taskCreate($input: TaskInput!) {
     taskCreate(input: $input) {
       errors {
@@ -27,7 +28,7 @@ export default function NewTask() {
   const {
     getLocalAppState,
     setLocalAppState,
-    request,
+    mutate,
     AppLink,
   } = useActions();
   const [uiErrors, setUIErrors] = useState([]);
@@ -37,7 +38,7 @@ export default function NewTask() {
   const handleNewTaskSubmit = async (event) => {
     event.preventDefault();
     const input = event.target.elements;
-    const { data, errors: rootErrors } = await request(TASK_CREATE, {
+    const { data, errors: rootErrors } = await mutate(TASK_CREATE, {
       variables: {
         input: {
           content: input.content.value,

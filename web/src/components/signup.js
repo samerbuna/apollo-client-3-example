@@ -1,9 +1,10 @@
 import React, { useState } from "react";
+import { gql } from "@apollo/client";
 
 import { useActions } from "../store";
 import Errors from "./errors";
 
-const USER_CREATE = `
+const USER_CREATE = gql`
   mutation userCreate($input: UserInput!) {
     userCreate(input: $input) {
       errors {
@@ -20,7 +21,7 @@ const USER_CREATE = `
 `;
 
 export default function Signup({ embedded }) {
-  const { request, setLocalAppState } = useActions();
+  const { mutate, setLocalAppState } = useActions();
   const [uiErrors, setUIErrors] = useState();
   const handleSignup = async (event) => {
     event.preventDefault();
@@ -28,7 +29,7 @@ export default function Signup({ embedded }) {
     if (input.password.value !== input.confirmPassword.value) {
       return setUIErrors([{ message: "Password mismatch" }]);
     }
-    const { data, errors: rootErrors } = await request(USER_CREATE, {
+    const { data, errors: rootErrors } = await mutate(USER_CREATE, {
       variables: {
         input: {
           firstName: input.firstName.value,

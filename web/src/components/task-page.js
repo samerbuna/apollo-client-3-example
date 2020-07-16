@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { gql } from "@apollo/client";
 
 import { useActions } from "../store";
 import Approach, { APPROACH_FRAGMENT } from "./approach";
 import TaskSummary, { TASK_SUMMARY_FRAGMENT } from "./task-summary";
 import NewApproach from "./new-approach";
 
-export const FULL_TASK_FRAGMENT = `
+export const FULL_TASK_FRAGMENT = gql`
   fragment FullTaskData on Task {
     id
     ...TaskSummary
@@ -18,7 +19,7 @@ export const FULL_TASK_FRAGMENT = `
   ${APPROACH_FRAGMENT}
 `;
 
-const TASK_INFO = `
+const TASK_INFO = gql`
   query taskInfo($taskId: ID!) {
     taskInfo(id: $taskId) {
       ...FullTaskData
@@ -28,7 +29,7 @@ const TASK_INFO = `
 `;
 
 export default function TaskPage({ taskId }) {
-  const { request, AppLink } = useActions();
+  const { query, AppLink } = useActions();
   const [taskInfo, setTaskInfo] = useState(null);
   const [showAddApproach, setShowAddApproach] = useState(false);
   const [
@@ -38,13 +39,11 @@ export default function TaskPage({ taskId }) {
 
   useEffect(() => {
     if (!taskInfo) {
-      request(TASK_INFO, { variables: { taskId } }).then(
-        ({ data }) => {
-          setTaskInfo(data.taskInfo);
-        }
-      );
+      query(TASK_INFO, { variables: { taskId } }).then(({ data }) => {
+        setTaskInfo(data.taskInfo);
+      });
     }
-  }, [taskId, taskInfo, request]);
+  }, [taskId, taskInfo, query]);
 
   const handleAppendNewApproach = (newApproach) => {
     setTaskInfo((pTask) => ({
