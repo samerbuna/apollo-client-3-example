@@ -81,24 +81,13 @@ export const useStore = () => {
 
   client.setLink(authLink.concat(httpLink));
 
-  const query = async (query, { variables } = {}) => {
-    const resp = await client.query({ query, variables });
-    return resp;
-  };
-
-  const mutate = async (mutation, { variables } = {}) => {
-    const resp = await client.mutate({ mutation, variables });
-    return resp;
-  };
-
   // In React components, the following is the object you get
   // when you make a useActions() call
   return {
     getLocalAppState,
     setLocalAppState,
     AppLink,
-    query,
-    mutate,
+    client,
   };
 };
 

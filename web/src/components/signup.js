@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { gql } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 
 import { useActions } from "../store";
 import Errors from "./errors";
@@ -21,15 +21,22 @@ const USER_CREATE = gql`
 `;
 
 export default function Signup({ embedded }) {
-  const { mutate, setLocalAppState } = useActions();
+  const { setLocalAppState } = useActions();
   const [uiErrors, setUIErrors] = useState();
+
+  const [createUser, { error, loading }] = useMutation(USER_CREATE);
+
+  if (error) {
+    return <div className="error">{error.message}</div>;
+  }
+
   const handleSignup = async (event) => {
     event.preventDefault();
     const input = event.target.elements;
     if (input.password.value !== input.confirmPassword.value) {
       return setUIErrors([{ message: "Password mismatch" }]);
     }
-    const { data, errors: rootErrors } = await mutate(USER_CREATE, {
+    const { data, errors: rootErrors } = await createUser({
       variables: {
         input: {
           firstName: input.firstName.value,
@@ -99,8 +106,12 @@ export default function Signup({ embedded }) {
         </div>
         <Errors errors={uiErrors} />
         <div className="spaced">
-          <button className="btn btn-primary" type="submit">
-            Signup
+          <button
+            className="btn btn-primary"
+            type="submit"
+            disabled={loading}
+          >
+            Signup {loading && <i className="spinner">...</i>}
           </button>
         </div>
       </form>

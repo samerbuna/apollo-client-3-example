@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { gql } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 
 import { useActions } from "../store";
 import Errors from "./errors";
@@ -24,8 +24,12 @@ const APPROACH_CREATE = gql`
 `;
 
 export default function NewApproach({ taskId, onSuccess }) {
-  const { getLocalAppState, mutate } = useActions();
+  const { getLocalAppState } = useActions();
   const [uiErrors, setUIErrors] = useState([]);
+
+  const [createApproach, { error, loading }] = useMutation(
+    APPROACH_CREATE
+  );
 
   const user = getLocalAppState("user");
 
@@ -33,17 +37,14 @@ export default function NewApproach({ taskId, onSuccess }) {
     event.preventDefault();
     setUIErrors([]);
     const input = event.target.elements;
-    const { data, errors: rootErrors } = await mutate(
-      APPROACH_CREATE,
-      {
-        variables: {
-          taskId,
-          input: {
-            content: input.content.value,
-          },
+    const { data, errors: rootErrors } = await createApproach({
+      variables: {
+        taskId,
+        input: {
+          content: input.content.value,
         },
-      }
-    );
+      },
+    });
     if (rootErrors) {
       return setUIErrors(rootErrors);
     }
@@ -66,6 +67,10 @@ export default function NewApproach({ taskId, onSuccess }) {
     );
   }
 
+  if (error) {
+    return <div className="error">{error.message}</div>;
+  }
+
   return (
     <div className="main-container">
       <div className="box box-primary">
@@ -78,8 +83,12 @@ export default function NewApproach({ taskId, onSuccess }) {
           </div>
           <Errors errors={uiErrors} />
           <div className="spaced">
-            <button className="btn btn-primary" type="submit">
-              Save
+            <button
+              className="btn btn-primary"
+              type="submit"
+              disabled={loading}
+            >
+              Save {loading && <i className="spinner">...</i>}
             </button>
           </div>
         </form>

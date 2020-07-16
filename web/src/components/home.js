@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { gql } from "@apollo/client";
+import React from "react";
+import { gql, useQuery } from "@apollo/client";
 
-import { useActions } from "../store";
 import TaskSummary, { TASK_SUMMARY_FRAGMENT } from "./task-summary";
 import Search from "./search";
 
@@ -17,16 +16,13 @@ const TASK_LIST = gql`
 `;
 
 export default function Home() {
-  const { query } = useActions();
-  const [taskList, setTaskList] = useState(null);
+  const { error, loading, data } = useQuery(TASK_LIST);
 
-  useEffect(() => {
-    query(TASK_LIST).then(({ data }) => {
-      setTaskList(data.taskList);
-    });
-  }, [query]);
+  if (error) {
+    return <div className="error">{error.message}</div>;
+  }
 
-  if (!taskList) {
+  if (loading) {
     return <div className="loading">Loading...</div>;
   }
 
@@ -35,7 +31,7 @@ export default function Home() {
       <Search />
       <div>
         <h1>Latest</h1>
-        {taskList.map((task) => (
+        {data.taskList.map((task) => (
           <TaskSummary key={task.id} task={task} link={true} />
         ))}
       </div>

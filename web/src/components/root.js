@@ -1,6 +1,11 @@
 import React from "react";
+import { ApolloProvider } from "@apollo/client";
 
-import { useStore, useActions, Provider } from "../store";
+import {
+  useStore,
+  useActions,
+  Provider as StoreProvider,
+} from "../store";
 import * as mainComponents from "./index";
 import Navbar from "./navbar";
 
@@ -22,8 +27,10 @@ function MainRouter() {
 export default function Root() {
   const store = useStore();
   return (
-    <Provider value={store}>
-      <MainRouter />
-    </Provider>
+    <ApolloProvider client={store.client}>
+      <StoreProvider value={store}>
+        <MainRouter />
+      </StoreProvider>
+    </ApolloProvider>
   );
 }

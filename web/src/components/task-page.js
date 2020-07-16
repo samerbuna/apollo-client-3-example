@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { gql } from "@apollo/client";
+import React, { useState } from "react";
+import { gql, useApolloClient, useQuery } from "@apollo/client";
 
 import { useActions } from "../store";
 import Approach, { APPROACH_FRAGMENT } from "./approach";
@@ -29,27 +29,40 @@ const TASK_INFO = gql`
 `;
 
 export default function TaskPage({ taskId }) {
-  const { query, AppLink } = useActions();
-  const [taskInfo, setTaskInfo] = useState(null);
+  const { AppLink } = useActions();
   const [showAddApproach, setShowAddApproach] = useState(false);
   const [
     highlightedApproachId,
     setHighlightedApproachId,
   ] = useState();
 
-  useEffect(() => {
-    if (!taskInfo) {
-      query(TASK_INFO, { variables: { taskId } }).then(({ data }) => {
-        setTaskInfo(data.taskInfo);
-      });
-    }
-  }, [taskId, taskInfo, query]);
+  const { error, loading, data } = useQuery(TASK_INFO, {
+    variables: { taskId },
+  });
+
+  const client = useApolloClient();
+
+  if (error) {
+    return <div className="error">{error.message}</div>;
+  }
+
+  if (loading) {
+    return <div className="loading">Loading...</div>;
+  }
+
+  const { taskInfo } = data;
 
   const handleAppendNewApproach = (newApproach) => {
-    setTaskInfo((pTask) => ({
-      ...pTask,
-      approachList: [newApproach, ...pTask.approachList],
-    }));
+    client.writeQuery({
+      query: TASK_INFO,
+      variables: { taskId },
+      data: {
+        taskInfo: {
+          ...taskInfo,
+          approachList: [newApproach, ...taskInfo.approachList],
+        },
+      },
+    });
     setHighlightedApproachId(newApproach.id);
     setShowAddApproach(false);
   };

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { gql } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 
-import { useActions } from "../store";
 import Errors from "./errors";
 
 export const APPROACH_FRAGMENT = gql`
@@ -30,13 +29,16 @@ const APPROACH_VOTE = gql`
 `;
 
 export default function Approach({ approach, isHighlighted }) {
-  const { mutate } = useActions();
   const [uiErrors, setUIErrors] = useState();
-  const [voteCount, setVoteCount] = useState(approach.voteCount);
+  const [submitVote, { error, loading }] = useMutation(APPROACH_VOTE);
+
+  if (error) {
+    return <div className="error">{error.message}</div>;
+  }
 
   const handleVote = (direction) => async (event) => {
     event.preventDefault();
-    const { data, errors: rootErrors } = await mutate(APPROACH_VOTE, {
+    const { data, errors: rootErrors } = await submitVote({
       variables: {
         approachId: approach.id,
         up: direction === "UP",
@@ -45,15 +47,18 @@ export default function Approach({ approach, isHighlighted }) {
     if (rootErrors) {
       return setUIErrors(rootErrors);
     }
-    const { errors, updatedApproach } = data.approachVote;
+    const { errors } = data.approachVote;
     if (errors.length > 0) {
       return setUIErrors(errors);
     }
-    setVoteCount(updatedApproach.voteCount);
   };
 
   const renderVoteButton = (direction) => (
-    <button className="border-none" onClick={handleVote(direction)}>
+    <button
+      className="border-none"
+      onClick={handleVote(direction)}
+      disabled={loading}
+    >
       <svg
         aria-hidden="true"
         width="24"
@@ -76,7 +81,7 @@ export default function Approach({ approach, isHighlighted }) {
       <div className="approach">
         <div className="vote">
           {renderVoteButton("UP")}
-          {voteCount}
+          {approach.voteCount}
           {renderVoteButton("DOWN")}
         </div>
         <div className="main">
