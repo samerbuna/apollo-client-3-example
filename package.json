@@ -1,0 +1,36 @@
+{
+  "name": "az.dev",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "db-server": "docker-compose -f db/docker.yml up",
+    "api-server": "(cd api && cross-env NODE_PATH=./src nodemon -r esm src/server.js)",
+    "web-server": "(cd web/src && rimraf .cache dist && parcel index.html)"
+  },
+  "dependencies": {
+    "apollo-server": "^2.15.1",
+    "axios": "^0.19.2",
+    "cors": "^2.8.5",
+    "cross-env": "^7.0.2",
+    "dataloader": "^2.0.0",
+    "dotenv": "^8.2.0",
+    "esm": "^3.2.25",
+    "graphql": "^15.3.0",
+    "morgan": "^1.10.0",
+    "pg": "^8.3.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "devDependencies": {
+    "eslint": "7.4.0",
+    "eslint-plugin-react": "^7.20.3",
+    "eslint-plugin-react-hooks": "^4.0.8",
+    "lodash": "^4.17.19",
+    "nodemon": "^2.0.4",
+    "parcel-bundler": "^1.12.4",
+    "rimraf": "^3.0.2"
+  },
+  "browserslist": [
+    "> 0.5%, last 2 versions, not dead"
+  ]
+}
