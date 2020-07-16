@@ -1,17 +1,13 @@
 import React from "react";
 import { ApolloProvider } from "@apollo/client";
 
-import {
-  useStore,
-  useActions,
-  Provider as StoreProvider,
-} from "../store";
+import { client, useLocalAppState } from "../store";
+
 import * as mainComponents from "./index";
 import Navbar from "./navbar";
 
 function MainRouter() {
-  const { getLocalAppState } = useActions();
-  const [component, user] = getLocalAppState("component", "user");
+  const [component, user] = useLocalAppState("component", "user");
   const Component = mainComponents[component.name];
 
   return (
@@ -25,12 +21,9 @@ function MainRouter() {
 }
 
 export default function Root() {
-  const store = useStore();
   return (
-    <ApolloProvider client={store.client}>
-      <StoreProvider value={store}>
-        <MainRouter />
-      </StoreProvider>
+    <ApolloProvider client={client}>
+      <MainRouter />
     </ApolloProvider>
   );
 }

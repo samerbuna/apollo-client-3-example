@@ -1,6 +1,6 @@
 import React from "react";
 
-import { useActions } from "../store";
+import { AppLink } from "../store";
 
 export const TASK_SUMMARY_FRAGMENT = `
   fragment TaskSummary on Task {
@@ -11,8 +11,6 @@ export const TASK_SUMMARY_FRAGMENT = `
 `;
 
 export default function TaskSummary({ task, link = false }) {
-  const { AppLink } = useActions();
-
   return (
     <div className="box box-primary">
       {link ? (

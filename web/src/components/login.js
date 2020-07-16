@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { gql, useMutation } from "@apollo/client";
 
-import { useActions } from "../store";
+import { setLocalAppState } from "../store";
 import Errors from "./errors";
 
 const USER_LOGIN = gql`
@@ -21,7 +21,6 @@ const USER_LOGIN = gql`
 `;
 
 export default function Login({ embedded }) {
-  const { setLocalAppState } = useActions();
   const [uiErrors, setUIErrors] = useState();
 
   const [loginUser, { error, loading }] = useMutation(USER_LOGIN);
