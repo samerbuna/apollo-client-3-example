@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { gql } from "@apollo/client";
 
 import { useActions } from "../store";
 import TaskSummary, { TASK_SUMMARY_FRAGMENT } from "./task-summary";
 
-const MY_TASK_LIST = `
+const MY_TASK_LIST = gql`
   query myTaskList {
     me {
       taskList {
@@ -17,17 +18,17 @@ const MY_TASK_LIST = `
 `;
 
 export default function MyTasks() {
-  const { request } = useActions();
+  const { query } = useActions();
 
   const [myTaskList, setMyTaskList] = useState(null);
 
   useEffect(() => {
-    request(MY_TASK_LIST).then((resp) => {
+    query(MY_TASK_LIST).then((resp) => {
       console.log(resp);
 
       setMyTaskList(resp.data.me.taskList);
     });
-  }, [request]);
+  }, [query]);
 
   if (!myTaskList) {
     return <div className="loading">Loading...</div>;

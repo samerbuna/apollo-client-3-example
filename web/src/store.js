@@ -1,7 +1,16 @@
 import React, { useState } from "react";
-import axios from "axios";
 
 import { GRAPHQL_SERVER_URL } from "./config";
+
+import {
+  ApolloClient,
+  HttpLink,
+  InMemoryCache,
+} from "@apollo/client";
+
+const cache = new InMemoryCache();
+const httpLink = new HttpLink({ uri: GRAPHQL_SERVER_URL });
+const client = new ApolloClient({ link: httpLink, cache });
 
 const initialLocalAppState = {
   component: { name: "Home", props: {} },
@@ -55,20 +64,14 @@ export const useStore = () => {
     );
   };
 
-  // This function should make an ajax call to GraphQL server
-  // and return the GraphQL response object
-  const request = async (requestText, { variables } = {}) => {
-    const headers = state.user
-      ? { Authorization: "Bearer " + state.user.authToken }
-      : {};
+  const query = async (query, { variables } = {}) => {
+    const resp = await client.query({ query, variables });
+    return resp;
+  };
 
-    const { data } = await axios.post(
-      GRAPHQL_SERVER_URL,
-      { query: requestText, variables },
-      { headers }
-    );
-
-    return data;
+  const mutate = async (mutation, { variables } = {}) => {
+    const resp = await client.mutate({ mutation, variables });
+    return resp;
   };
 
   // In React components, the following is the object you get
@@ -77,7 +80,8 @@ export const useStore = () => {
     getLocalAppState,
     setLocalAppState,
     AppLink,
-    request,
+    query,
+    mutate,
   };
 };
 
