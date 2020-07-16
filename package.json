@@ -10,6 +10,7 @@
   "dependencies": {
     "@apollo/client": "^3.0.1",
     "@apollo/link-context": "^2.0.0-beta.3",
+    "@apollo/link-ws": "^2.0.0-beta.3",
     "apollo-server": "^2.15.1",
     "cors": "^2.8.5",
     "cross-env": "^7.0.2",
@@ -20,7 +21,8 @@
     "morgan": "^1.10.0",
     "pg": "^8.3.0",
     "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "react-dom": "^16.13.1",
+    "subscriptions-transport-ws": "^0.9.17"
   },
   "devDependencies": {
     "eslint": "7.4.0",

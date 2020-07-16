@@ -10,9 +10,13 @@ export const TASK_SUMMARY_FRAGMENT = `
   }
 `;
 
-export default function TaskSummary({ task, link = false }) {
+export default function TaskSummary({
+  task,
+  link = false,
+  isHighlighted = false,
+}) {
   return (
-    <div className="box box-primary">
+    <div className={`box box-primary highlighted-${isHighlighted}`}>
       {link ? (
         <AppLink to="TaskPage" taskId={task.id}>
           {task.content}
