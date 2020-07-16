@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { gql } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 
 import { useActions } from "../store";
 import Errors from "./errors";
@@ -21,12 +21,19 @@ const USER_LOGIN = gql`
 `;
 
 export default function Login({ embedded }) {
-  const { mutate, setLocalAppState } = useActions();
+  const { setLocalAppState } = useActions();
   const [uiErrors, setUIErrors] = useState();
+
+  const [loginUser, { error, loading }] = useMutation(USER_LOGIN);
+
+  if (error) {
+    return <div className="error">{error.message}</div>;
+  }
+
   const handleLogin = async (event) => {
     event.preventDefault();
     const input = event.target.elements;
-    const { data, errors: rootErrors } = await mutate(USER_LOGIN, {
+    const { data, errors: rootErrors } = await loginUser({
       variables: {
         input: {
           username: input.username.value,
@@ -66,8 +73,12 @@ export default function Login({ embedded }) {
         </div>
         <Errors errors={uiErrors} />
         <div className="spaced">
-          <button className="btn btn-primary" type="submit">
-            Login
+          <button
+            className="btn btn-primary"
+            type="submit"
+            disabled={loading}
+          >
+            Login {loading && <i className="spinner">...</i>}
           </button>
         </div>
       </form>

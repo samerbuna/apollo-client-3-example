@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { gql } from "@apollo/client";
+import React from "react";
+import { gql, useQuery } from "@apollo/client";
 
-import { useActions } from "../store";
 import TaskSummary, { TASK_SUMMARY_FRAGMENT } from "./task-summary";
 
 const MY_TASK_LIST = gql`
@@ -18,19 +17,13 @@ const MY_TASK_LIST = gql`
 `;
 
 export default function MyTasks() {
-  const { query } = useActions();
+  const { error, loading, data } = useQuery(MY_TASK_LIST);
 
-  const [myTaskList, setMyTaskList] = useState(null);
+  if (error) {
+    return <div className="error">{error.message}</div>;
+  }
 
-  useEffect(() => {
-    query(MY_TASK_LIST).then((resp) => {
-      console.log(resp);
-
-      setMyTaskList(resp.data.me.taskList);
-    });
-  }, [query]);
-
-  if (!myTaskList) {
+  if (loading) {
     return <div className="loading">Loading...</div>;
   }
 
@@ -39,13 +32,13 @@ export default function MyTasks() {
       <div>
         <h1>My Tasks</h1>
 
-        {myTaskList.length === 0 && (
+        {data.me.taskList.length === 0 && (
           <div className="box box-primary">
             You have not created any Task entries yet
           </div>
         )}
 
-        {myTaskList.map((task) => (
+        {data.me.taskList.map((task) => (
           <TaskSummary key={task.id} task={task} link={true} />
         ))}
       </div>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { gql } from "@apollo/client";
+import React from "react";
+import { gql, useQuery } from "@apollo/client";
 
 import { useActions } from "../store";
 
@@ -22,58 +22,30 @@ const SEARCH_RESULTS = gql`
   }
 `;
 
-const Search = ({ searchTerm = null }) => {
-  const { setLocalAppState, query, AppLink } = useActions();
-  const [searchResults, setSearchResults] = useState(null);
+function SearchResults({ searchTerm }) {
+  const { AppLink } = useActions();
+  const { error, loading, data } = useQuery(SEARCH_RESULTS, {
+    variables: { searchTerm },
+  });
 
-  const handleSearchSubmit = async (event) => {
-    event.preventDefault();
-    const term = event.target.search.value;
+  if (error) {
+    return <div className="error">{error.message}</div>;
+  }
 
-    setLocalAppState({
-      component: { name: "Search", props: { searchTerm: term } },
-    });
-  };
-
-  useEffect(() => {
-    if (searchTerm) {
-      query(SEARCH_RESULTS, { variables: { searchTerm } }).then(
-        ({ data }) => {
-          setSearchResults(data.searchResults);
-        }
-      );
-    }
-  }, [searchTerm, query]);
+  if (loading) {
+    return <div className="loading">{loading}</div>;
+  }
 
   return (
     <div>
-      <div className="main-container">
-        <form method="post" onSubmit={handleSearchSubmit}>
-          <div className="center">
-            <input
-              type="search"
-              name="search"
-              className="input-append"
-              defaultValue={searchTerm}
-              placeholder="Search all tasks and approaches"
-              required
-            />
-            <div className="">
-              <button className="btn btn-append" type="submit">
-                Search
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-      {searchResults && (
+      {data.searchResults && (
         <div>
           <h2>Search Results</h2>
           <div className="y-spaced">
-            {searchResults.length === 0 && (
+            {data.searchResults.length === 0 && (
               <div className="box box-primary">No results</div>
             )}
-            {searchResults.map((item, index) => (
+            {data.searchResults.map((item, index) => (
               <div key={index} className="box box-primary">
                 <AppLink
                   to="TaskPage"
@@ -97,6 +69,41 @@ const Search = ({ searchTerm = null }) => {
       )}
     </div>
   );
-};
+}
 
-export default Search;
+export default function Search({ searchTerm = null }) {
+  const { setLocalAppState } = useActions();
+
+  const handleSearchSubmit = async (event) => {
+    event.preventDefault();
+    const term = event.target.search.value;
+    setLocalAppState({
+      component: { name: "Search", props: { searchTerm: term } },
+    });
+  };
+
+  return (
+    <div>
+      <div className="main-container">
+        <form method="post" onSubmit={handleSearchSubmit}>
+          <div className="center">
+            <input
+              type="search"
+              name="search"
+              className="input-append"
+              defaultValue={searchTerm}
+              placeholder="Search all tasks and approaches"
+              required
+            />
+            <div className="">
+              <button className="btn btn-append" type="submit">
+                Search
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+      {searchTerm && <SearchResults searchTerm={searchTerm} />}
+    </div>
+  );
+}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { gql } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 
 import { useActions } from "../store";
 import Errors from "./errors";
@@ -28,17 +28,18 @@ export default function NewTask() {
   const {
     getLocalAppState,
     setLocalAppState,
-    mutate,
     AppLink,
   } = useActions();
   const [uiErrors, setUIErrors] = useState([]);
+
+  const [createTask, { error, loading }] = useMutation(TASK_CREATE);
 
   const user = getLocalAppState("user");
 
   const handleNewTaskSubmit = async (event) => {
     event.preventDefault();
     const input = event.target.elements;
-    const { data, errors: rootErrors } = await mutate(TASK_CREATE, {
+    const { data, errors: rootErrors } = await createTask({
       variables: {
         input: {
           content: input.content.value,
@@ -71,6 +72,10 @@ export default function NewTask() {
         </div>
       </div>
     );
+  }
+
+  if (error) {
+    return <div className="error">{error.message}</div>;
   }
 
   return (
@@ -108,8 +113,12 @@ export default function NewTask() {
           </div>
           <Errors errors={uiErrors} />
           <div className="spaced">
-            <button className="btn btn-primary" type="submit">
-              Save
+            <button
+              className="btn btn-primary"
+              type="submit"
+              disabled={loading}
+            >
+              Save {loading && <i className="spinner">...</i>}
             </button>
           </div>
         </form>
