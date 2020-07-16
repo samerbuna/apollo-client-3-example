@@ -7,6 +7,7 @@ import {
   HttpLink,
   InMemoryCache,
 } from "@apollo/client";
+import { setContext } from "@apollo/link-context";
 
 const cache = new InMemoryCache();
 const httpLink = new HttpLink({ uri: GRAPHQL_SERVER_URL });
@@ -44,6 +45,9 @@ export const useStore = () => {
     setState((currentState) => {
       return { ...currentState, ...newState };
     });
+    if (newState.user || newState.user === null) {
+      client.resetStore();
+    }
   };
 
   // This is a component that can be used in place of
@@ -63,6 +67,19 @@ export const useStore = () => {
       </a>
     );
   };
+
+  const authLink = setContext((_, { headers }) => {
+    return {
+      headers: {
+        ...headers,
+        authorization: state.user
+          ? `Bearer ${state.user.authToken}`
+          : "",
+      },
+    };
+  });
+
+  client.setLink(authLink.concat(httpLink));
 
   const query = async (query, { variables } = {}) => {
     const resp = await client.query({ query, variables });
