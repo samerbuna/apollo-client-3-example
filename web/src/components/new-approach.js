@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { gql, useMutation } from "@apollo/client";
+import React, { useState } from 'react';
+import { gql, useMutation } from '@apollo/client';
 
-import { useLocalAppState } from "../store";
+import { useLocalQuery } from '../store';
 
-import Errors from "./errors";
-import LoginOrSignup from "./login-or-signup";
-import { APPROACH_FRAGMENT } from "./approach";
+import Errors from './errors';
+import LoginOrSignup from './login-or-signup';
+import { APPROACH_FRAGMENT } from './approach';
 
 const APPROACH_CREATE = gql`
   mutation approachCreate($taskId: ID!, $input: ApproachInput!) {
@@ -27,11 +27,9 @@ const APPROACH_CREATE = gql`
 export default function NewApproach({ taskId, onSuccess }) {
   const [uiErrors, setUIErrors] = useState([]);
 
-  const [createApproach, { error, loading }] = useMutation(
-    APPROACH_CREATE
-  );
+  const [createApproach, { error, loading }] = useMutation(APPROACH_CREATE);
 
-  const user = useLocalAppState("user");
+  const user = useLocalQuery('user');
 
   const handleNewApproachSubmit = async (event) => {
     event.preventDefault();

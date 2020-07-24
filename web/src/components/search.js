@@ -1,7 +1,7 @@
-import React from "react";
-import { gql, useQuery } from "@apollo/client";
+import React from 'react';
+import { gql, useQuery } from '@apollo/client';
 
-import { setLocalAppState, AppLink } from "../store";
+import { useLocalMutation, AppLink } from '../store';
 
 const SEARCH_RESULTS = gql`
   query searchResults($searchTerm: String!) {
@@ -48,22 +48,20 @@ function SearchResults({ searchTerm }) {
               <div key={index} className="box box-primary">
                 <AppLink
                   to="TaskPage"
-                  taskId={
-                    item.type === "Approach" ? item.task.id : item.id
-                  }
+                  taskId={item.type === 'Approach' ? item.task.id : item.id}
                 >
-                  <span className="search-label">{item.type}</span>{" "}
+                  <span className="search-label">{item.type}</span>{' '}
                   {item.content.substr(0, 250)}
                 </AppLink>
                 <div className="search-sub-line">
-                  {item.type === "Task"
+                  {item.type === 'Task'
                     ? `Approaches: ${item.approachCount}`
                     : `Task: ${item.task.content.substr(0, 250)}`}
                 </div>
               </div>
             ))}
           </div>
-          <AppLink to="Home">{"<"} Home</AppLink>
+          <AppLink to="Home">{'<'} Home</AppLink>
         </div>
       )}
     </div>
@@ -71,11 +69,13 @@ function SearchResults({ searchTerm }) {
 }
 
 export default function Search({ searchTerm = null }) {
+  const setLocalAppState = useLocalMutation();
+
   const handleSearchSubmit = async (event) => {
     event.preventDefault();
     const term = event.target.search.value;
     setLocalAppState({
-      component: { name: "Search", props: { searchTerm: term } },
+      component: { name: 'Search', props: { searchTerm: term } },
     });
   };
 

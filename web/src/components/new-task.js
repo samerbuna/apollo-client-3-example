@@ -1,15 +1,11 @@
-import React, { useState } from "react";
-import { gql, useMutation } from "@apollo/client";
+import React, { useState } from 'react';
+import { gql, useMutation } from '@apollo/client';
 
-import {
-  useLocalAppState,
-  setLocalAppState,
-  AppLink,
-} from "../store";
-import Errors from "./errors";
-import LoginOrSignup from "./login-or-signup";
+import { useLocalQuery, useLocalMutation, AppLink } from '../store';
+import Errors from './errors';
+import LoginOrSignup from './login-or-signup';
 
-import { FULL_TASK_FRAGMENT } from "./task-page";
+import { FULL_TASK_FRAGMENT } from './task-page';
 
 const TASK_CREATE = gql`
   mutation taskCreate($input: TaskInput!) {
@@ -29,11 +25,13 @@ const TASK_CREATE = gql`
 `;
 
 export default function NewTask() {
+  const setLocalAppState = useLocalMutation();
+
   const [uiErrors, setUIErrors] = useState([]);
 
   const [createTask, { error, loading }] = useMutation(TASK_CREATE);
 
-  const user = useLocalAppState("user");
+  const user = useLocalQuery('user');
 
   const handleNewTaskSubmit = async (event) => {
     event.preventDefault();
@@ -42,7 +40,7 @@ export default function NewTask() {
       variables: {
         input: {
           content: input.content.value,
-          tags: input.tags.value.split(","),
+          tags: input.tags.value.split(','),
           isPrivate: input.isPrivate.checked,
         },
       },
@@ -56,7 +54,7 @@ export default function NewTask() {
     }
     setLocalAppState({
       component: {
-        name: "TaskPage",
+        name: 'TaskPage',
         props: { taskId: task.id },
       },
     });
@@ -79,7 +77,7 @@ export default function NewTask() {
 
   return (
     <div className="main-container">
-      <AppLink to="Home">{"<"} Cancel</AppLink>
+      <AppLink to="Home">{'<'} Cancel</AppLink>
       <div className="box box-primary">
         <form method="POST" onSubmit={handleNewTaskSubmit}>
           <div className="form-entry">
@@ -106,8 +104,8 @@ export default function NewTask() {
 
           <div className="form-entry">
             <label>
-              <input type="checkbox" name="isPrivate" /> Make this a
-              private entry (only for your account)
+              <input type="checkbox" name="isPrivate" /> Make this a private
+              entry (only for your account)
             </label>
           </div>
           <Errors errors={uiErrors} />

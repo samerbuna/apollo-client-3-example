@@ -1,13 +1,15 @@
-import React from "react";
+import React from 'react';
 
-import { setLocalAppState, AppLink } from "../store";
+import { useLocalMutation, AppLink } from '../store';
 
 export default function Navbar({ user }) {
+  const setLocalAppState = useLocalMutation();
+
   const handleLogout = (event) => {
     event.preventDefault();
-    window.localStorage.removeItem("azdev:user");
+    window.localStorage.removeItem('azdev:user');
     setLocalAppState({
-      component: { name: "Home" },
+      component: { name: 'Home' },
       user: null,
     });
   };

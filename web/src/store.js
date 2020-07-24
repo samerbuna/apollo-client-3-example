@@ -1,55 +1,5 @@
-import React from "react";
-import {
-  ApolloClient,
-  HttpLink,
-  InMemoryCache,
-  gql,
-  useQuery,
-  split,
-} from "@apollo/client";
-import { getMainDefinition } from "@apollo/client/utilities";
-import { setContext } from "@apollo/link-context";
-import { WebSocketLink } from "@apollo/link-ws";
-
-import {
-  GRAPHQL_SERVER_URL,
-  GRAPHQL_SUBSCRIPTIONS_URL,
-} from "./config";
-
-const cache = new InMemoryCache();
-const httpLink = new HttpLink({ uri: GRAPHQL_SERVER_URL });
-
-const wsLink = new WebSocketLink({
-  uri: GRAPHQL_SUBSCRIPTIONS_URL,
-  options: { reconnect: true },
-});
-
-const authLink = setContext((_, { headers }) => {
-  const { user } = cache.readQuery({ query: LOCAL_APP_STATE });
-  return {
-    headers: {
-      ...headers,
-      authorization: user ? `Bearer ${user.authToken}` : "",
-    },
-  };
-});
-
-const splitLink = split(
-  ({ query }) => {
-    const definition = getMainDefinition(query);
-    return (
-      definition.kind === "OperationDefinition" &&
-      definition.operation === "subscription"
-    );
-  },
-  wsLink,
-  authLink.concat(httpLink)
-);
-
-export const client = new ApolloClient({
-  link: splitLink,
-  cache,
-});
+import React from 'react';
+import { gql, useQuery, useApolloClient } from '@apollo/client';
 
 export const LOCAL_APP_STATE = gql`
   query localAppState {
@@ -66,9 +16,9 @@ export const LOCAL_APP_STATE = gql`
 
 // This function can be used with 1 or more
 // state elements. For example:
-// const user = useLocalAppState('user');
-// const [component, user] = useLocalAppState('component', 'user');
-export const useLocalAppState = (...stateMapper) => {
+// const user = useLocalQuery('user');
+// const [component, user] = useLocalQuery('component', 'user');
+export const useLocalQuery = (...stateMapper) => {
   const { data } = useQuery(LOCAL_APP_STATE);
   if (stateMapper.length === 1) {
     return data[stateMapper[0]];
@@ -78,25 +28,29 @@ export const useLocalAppState = (...stateMapper) => {
 
 // This function shallow-merges a newState object
 // with the current local app state object
-export const setLocalAppState = (newState) => {
-  if (newState.component) {
-    newState.component.props = newState.component.props ?? {};
-  }
-  const currentState = cache.readQuery({
-    query: LOCAL_APP_STATE,
-  });
-  const updateState = () => {
-    cache.writeQuery({
+export const useLocalMutation = () => {
+  const client = useApolloClient();
+
+  return (newState) => {
+    if (newState.component) {
+      newState.component.props = newState.component.props ?? {};
+    }
+    const currentState = client.readQuery({
       query: LOCAL_APP_STATE,
-      data: { ...currentState, ...newState },
     });
+    const updateState = () => {
+      client.writeQuery({
+        query: LOCAL_APP_STATE,
+        data: { ...currentState, ...newState },
+      });
+    };
+    if (newState.user || newState.user === null) {
+      client.onResetStore(updateState);
+      client.resetStore();
+    } else {
+      updateState();
+    }
   };
-  if (newState.user || newState.user === null) {
-    client.onResetStore(updateState);
-    client.resetStore();
-  } else {
-    updateState();
-  }
 };
 
 // This is a component that can be used in place of
@@ -104,6 +58,7 @@ export const setLocalAppState = (newState) => {
 // in the single-page app. The `to` prop is expected to be
 // a React component (like `Home` or `TaskPage`)
 export const AppLink = ({ children, to, ...props }) => {
+  const setLocalAppState = useLocalMutation();
   const handleClick = (event) => {
     event.preventDefault();
     setLocalAppState({
@@ -116,13 +71,3 @@ export const AppLink = ({ children, to, ...props }) => {
     </a>
   );
 };
-
-const initialLocalAppState = {
-  component: { name: "Home", props: {} },
-  user: JSON.parse(window.localStorage.getItem("azdev:user")),
-};
-
-cache.writeQuery({
-  query: LOCAL_APP_STATE,
-  data: initialLocalAppState,
-});

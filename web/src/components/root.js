@@ -1,13 +1,12 @@
-import React from "react";
-import { ApolloProvider } from "@apollo/client";
+import React from 'react';
 
-import { client, useLocalAppState } from "../store";
+import { useLocalQuery } from '../store';
 
-import * as mainComponents from "./index";
-import Navbar from "./navbar";
+import * as mainComponents from './index';
+import Navbar from './navbar';
 
-function MainRouter() {
-  const [component, user] = useLocalAppState("component", "user");
+export default function Root() {
+  const [component, user] = useLocalQuery('component', 'user');
   const Component = mainComponents[component.name];
 
   return (
@@ -17,13 +16,5 @@ function MainRouter() {
         <Component {...component.props} />
       </div>
     </div>
-  );
-}
-
-export default function Root() {
-  return (
-    <ApolloProvider client={client}>
-      <MainRouter />
-    </ApolloProvider>
   );
 }

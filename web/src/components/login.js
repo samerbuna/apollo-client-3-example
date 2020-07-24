@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { gql, useMutation } from "@apollo/client";
+import React, { useState } from 'react';
+import { gql, useMutation } from '@apollo/client';
 
-import { setLocalAppState } from "../store";
-import Errors from "./errors";
+import { useLocalMutation } from '../store';
+import Errors from './errors';
 
 const USER_LOGIN = gql`
   mutation userLogin($input: AuthInput!) {
@@ -21,6 +21,8 @@ const USER_LOGIN = gql`
 `;
 
 export default function Login({ embedded }) {
+  const setLocalAppState = useLocalMutation();
+
   const [uiErrors, setUIErrors] = useState();
 
   const [loginUser, { error, loading }] = useMutation(USER_LOGIN);
@@ -48,10 +50,10 @@ export default function Login({ embedded }) {
       return setUIErrors(errors);
     }
     user.authToken = authToken;
-    window.localStorage.setItem("azdev:user", JSON.stringify(user));
+    window.localStorage.setItem('azdev:user', JSON.stringify(user));
     const newState = { user };
     if (!embedded) {
-      newState.component = { name: "Home" };
+      newState.component = { name: 'Home' };
     }
     setLocalAppState(newState);
   };
@@ -72,11 +74,7 @@ export default function Login({ embedded }) {
         </div>
         <Errors errors={uiErrors} />
         <div className="spaced">
-          <button
-            className="btn btn-primary"
-            type="submit"
-            disabled={loading}
-          >
+          <button className="btn btn-primary" type="submit" disabled={loading}>
             Login {loading && <i className="spinner">...</i>}
           </button>
         </div>

@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { gql, useMutation } from "@apollo/client";
+import React, { useState } from 'react';
+import { gql, useMutation } from '@apollo/client';
 
-import { setLocalAppState } from "../store";
+import { useLocalMutation } from '../store';
 
-import Errors from "./errors";
+import Errors from './errors';
 
 const USER_CREATE = gql`
   mutation userCreate($input: UserInput!) {
@@ -22,6 +22,8 @@ const USER_CREATE = gql`
 `;
 
 export default function Signup({ embedded }) {
+  const setLocalAppState = useLocalMutation();
+
   const [uiErrors, setUIErrors] = useState();
 
   const [createUser, { error, loading }] = useMutation(USER_CREATE);
@@ -34,7 +36,7 @@ export default function Signup({ embedded }) {
     event.preventDefault();
     const input = event.target.elements;
     if (input.password.value !== input.confirmPassword.value) {
-      return setUIErrors([{ message: "Password mismatch" }]);
+      return setUIErrors([{ message: 'Password mismatch' }]);
     }
     const { data, errors: rootErrors } = await createUser({
       variables: {
@@ -54,10 +56,10 @@ export default function Signup({ embedded }) {
       return setUIErrors(errors);
     }
     user.authToken = authToken;
-    window.localStorage.setItem("azdev:user", JSON.stringify(user));
+    window.localStorage.setItem('azdev:user', JSON.stringify(user));
     const newState = { user };
     if (!embedded) {
-      newState.component = { name: "Home" };
+      newState.component = { name: 'Home' };
     }
     setLocalAppState(newState);
   };
@@ -95,22 +97,14 @@ export default function Signup({ embedded }) {
             <div className="form-entry">
               <label>
                 CONFIRM PASSWORD
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  required
-                />
+                <input type="password" name="confirmPassword" required />
               </label>
             </div>
           </div>
         </div>
         <Errors errors={uiErrors} />
         <div className="spaced">
-          <button
-            className="btn btn-primary"
-            type="submit"
-            disabled={loading}
-          >
+          <button className="btn btn-primary" type="submit" disabled={loading}>
             Signup {loading && <i className="spinner">...</i>}
           </button>
         </div>
